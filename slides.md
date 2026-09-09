@@ -2,7 +2,7 @@
 theme: slidev-theme-tahta
 themeConfig: { variant: atelier }   # 他: brutalist, editorial, soft, minimal, paper, notebook, lagoon, press, boardroom, signal, muse, poster
 
-title: TypeORM → Prisma 移行をAIに任せる
+title: TypeORM → Prisma 移行をAIに任せみた
 info: |
   ## TypeORM → Prisma 移行を、AI エージェントに任せられる形に設計した話
   ASUENE SC 開発チームの ORM リプレース設計
