@@ -1,662 +1,243 @@
 ---
-# try also 'default' to start simple
-theme: seriph
-# random image from a curated Unsplash collection by Anthony
-# like them? see https://unsplash.com/collections/94734566/slidev
-background: https://cover.sli.dev
-# some information about your slides (markdown enabled)
-title: Welcome to Slidev
-info: |
-  ## Slidev Starter Template
-  Presentation slides for developers.
+theme: slidev-theme-tahta
+themeConfig: { variant: atelier }   # 他: brutalist, editorial, soft, minimal, paper, notebook, lagoon, press, boardroom, signal, muse, poster
 
-  Learn more at [Sli.dev](https://sli.dev)
-# apply UnoCSS classes to the current slide
-class: text-center
-# https://sli.dev/features/drawing
+title: TypeORM → Prisma 移行をAIに任せる
+info: |
+  ## TypeORM → Prisma 移行を、AI エージェントに任せられる形に設計した話
+  ASUENE SC 開発チームの ORM リプレース設計
+
+  元記事: https://zenn.dev/asuene/articles/d0e395d49be271
 drawings:
   persist: false
-# slide transition: https://sli.dev/guide/animations.html#slide-transitions
 transition: slide-left
-# enable Comark Syntax: https://comark.dev/syntax/markdown
 comark: true
-# duration of the presentation
-duration: 35min
+
+layout: cover
+kicker: ASUENE SC · Tech LT
+subtitle: 通常開発を止めずに ORM をリプレースする<span class="accent2">設計</span>の話
 ---
 
-# Welcome to Slidev
-
-Presentation slides for developers
-
-<div @click="$slidev.nav.next" class="mt-12 py-1" hover:bg="white op-10">
-  Press Space for next page <carbon:arrow-right />
-</div>
-
-<div class="abs-br m-6 text-xl">
-  <button @click="$slidev.nav.openInEditor()" title="Open in Editor" class="slidev-icon-btn">
-    <carbon:edit />
-  </button>
-  <a href="https://github.com/slidevjs/slidev" target="_blank" class="slidev-icon-btn">
-    <carbon:logo-github />
-  </a>
-</div>
-
 <!--
-The last comment block of each slide will be treated as slide notes. It will be visible and editable in Presenter Mode along with the slide. [Read more in the docs](https://sli.dev/guide/syntax.html#notes)
+NestJS 製サーバーの ORM を TypeORM から Prisma へ段階的に移行しています。
+今日話すのは「移行のやり方」ではなく「移行を任せられる形に設計した話」です。
 -->
 
 ---
-transition: fade-out
+layout: define
+kicker: 前提
+term: 何をやっているか
+definition: NestJS 製サーバーの ORM を、TypeORM から Prisma へ <span class="accent2">段階的に移行</span>中。
+points:
+  - Repository レイヤーを 1 メソッドずつ Prisma 化
+  - 通常開発（develop）は止めない
+  - 数十メソッド規模の単調な作業
 ---
 
-# What is Slidev?
-
-Slidev is a slides maker and presenter designed for developers, consist of the following features
-
-- 📝 **Text-based** - focus on the content with Markdown, and then style them later
-- 🎨 **Themable** - themes can be shared and re-used as npm packages
-- 🧑‍💻 **Developer Friendly** - code highlighting, live coding with autocompletion
-- 🤹 **Interactive** - embed Vue components to enhance your expressions
-- 🎥 **Recording** - built-in recording and camera view
-- 📤 **Portable** - export to PDF, PPTX, PNGs, or even a hostable SPA
-- 🛠 **Hackable** - virtually anything that's possible on a webpage is possible in Slidev
-<br>
-<br>
-
-Read more about [Why Slidev?](https://sli.dev/guide/why)
-
 <!--
-You can have `style` tag in markdown to override the style for the current page.
-Learn more: https://sli.dev/features/slide-scope-style
--->
-
-<style>
-h1 {
-  background-color: #2B90B6;
-  background-image: linear-gradient(45deg, #4EC5D4 10%, #146b8c 20%);
-  background-size: 100%;
-  -webkit-background-clip: text;
-  -moz-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  -moz-text-fill-color: transparent;
-}
-</style>
-
-<!--
-Here is another comment.
+規模感が大事です。数十メソッド。
+人間が根性でやる量ではないし、一括置換で済むほど単純でもない。
 -->
 
 ---
-transition: slide-up
-level: 2
+layout: panels
+kicker: Part 1
+title: なぜ「一気に書き換え」が<span class="accent2">できない</span>のか
+panels:
+  - icon: "lucide:git-branch"
+    title: develop が動き続ける
+    items:
+      - 差分が指数関数的に増える
+      - → API 単位でリリース
+  - icon: "lucide:file-diff"
+    title: 大きすぎる PR は通らない
+    items:
+      - 1 クラス分で +800 / −600 行
+      - → 1 メソッド = 1 PR
+  - icon: "lucide:shield-alert"
+    title: 挙動を変えていない保証
+    items:
+      - "`findOne` は null か throw か"
+      - → ハイブリッドテスト
 ---
-
-# Navigation
-
-Hover on the bottom-left corner to see the navigation's controls panel, [learn more](https://sli.dev/guide/ui#navigation-bar)
-
-## Keyboard Shortcuts
-
-|                                                     |                             |
-| --------------------------------------------------- | --------------------------- |
-| <kbd>right</kbd> / <kbd>space</kbd>                 | next animation or slide     |
-| <kbd>left</kbd>  / <kbd>shift</kbd><kbd>space</kbd> | previous animation or slide |
-| <kbd>up</kbd>                                       | previous slide              |
-| <kbd>down</kbd>                                     | next slide                  |
-
-<!-- https://sli.dev/guide/animations.html#click-animation -->
-<img
-  v-click
-  class="absolute -bottom-9 -left-7 w-80 opacity-50"
-  src="https://sli.dev/assets/arrow-bottom-left.svg"
-  alt=""
-/>
-<p v-after class="absolute bottom-23 left-45 opacity-30 transform -rotate-10">Here!</p>
-
----
-layout: two-cols
-layoutClass: gap-16
----
-
-# Table of contents
-
-You can use the `Toc` component to generate a table of contents for your slides:
-
-```html
-<Toc minDepth="1" maxDepth="1" />
-```
-
-The title will be inferred from your slide content, or you can override it with `title` and `level` in your frontmatter.
-
-::right::
-
-<Toc text-sm minDepth="1" maxDepth="2" />
-
----
-layout: image-right
-image: https://cover.sli.dev
----
-
-# Code
-
-Use code snippets and get the highlighting directly, and even types hover!
-
-```ts [filename-example.ts] {all|4|6|6-7|9|all} twoslash
-// TwoSlash enables TypeScript hover information
-// and errors in markdown code blocks
-// More at https://shiki.style/packages/twoslash
-import { computed, ref } from 'vue'
-
-const count = ref(0)
-const doubled = computed(() => count.value * 2)
-
-doubled.value = 2
-```
-
-<arrow v-click="[4, 5]" x1="350" y1="310" x2="195" y2="342" color="#953" width="2" arrowSize="1" />
-
-<!-- This allow you to embed external code blocks -->
-<<< @/snippets/external.ts#snippet
-
-<!-- Footer -->
-
-[Learn more](https://sli.dev/features/line-highlighting)
-
-<!-- Inline style -->
-<style>
-.footnotes-sep {
-  @apply mt-5 opacity-10;
-}
-.footnotes {
-  @apply text-sm opacity-75;
-}
-.footnote-backref {
-  display: none;
-}
-</style>
 
 <!--
-Notes can also sync with clicks
+3 つの制約があって、それぞれに対策があります。
 
-[click] This will be highlighted after the first click
+1 つ目。移行は短期で終わらないのに通常開発は続くので、
+大きな移行ブランチは develop との差分が指数関数的に増えてコンフリクト地獄になります。
 
-[click] Highlighted with `count = ref(0)`
+2 つ目。+800/−600 行の PR を渡されると、どの Prisma メソッドが
+どの TypeORM メソッドに対応するかをレビュアーが自力で復元しないといけない。
+結果、形式的な Approve か後回しになります。
 
-[click:3] Last click (skip two clicks)
+3 つ目。ORM を変えると「一見動いているが挙動が変わる」が起きます。
+
+今日はこの右の 2 つ、1メソッド=1PR とハイブリッドテストを深掘りします。
 -->
 
 ---
-level: 2
+layout: compare
+kicker: Part 2
+title: 移行の 3 ステップと、その PR 粒度
+columns: [ステップ, やること, PR 粒度]
+rows:
+  - { metric: Step 1, before: "TypeORM Repository のテストをハイブリッド Test 構成で作成", after: "1 メソッド = 1 PR" }
+  - { metric: Step 2, before: "Prisma 版 Repository を作成し、テストの import 先を差し替え", after: "1 メソッド = 1 PR" }
+  - { metric: Step 3, before: "Service の呼び出しを Prisma 版に切り替え", after: "1 Repository = 1 PR" }
 ---
-
-# Shiki Magic Move
-
-Powered by [shiki-magic-move](https://shiki-magic-move.netlify.app/), Slidev supports animations across multiple code snippets.
-
-Add multiple code blocks and wrap them with <code>````md magic-move</code> (four backticks) to enable the magic move. For example:
-
-````md magic-move {lines: true}
-```ts {*|2|*}
-// step 1
-const author = reactive({
-  name: 'John Doe',
-  books: [
-    'Vue 2 - Advanced Guide',
-    'Vue 3 - Basic Guide',
-    'Vue 4 - The Mystery'
-  ]
-})
-```
-
-```ts {*|1-2|3-4|3-4,8}
-// step 2
-export default {
-  data() {
-    return {
-      author: {
-        name: 'John Doe',
-        books: [
-          'Vue 2 - Advanced Guide',
-          'Vue 3 - Basic Guide',
-          'Vue 4 - The Mystery'
-        ]
-      }
-    }
-  }
-}
-```
-
-```ts
-// step 3
-export default {
-  data: () => ({
-    author: {
-      name: 'John Doe',
-      books: [
-        'Vue 2 - Advanced Guide',
-        'Vue 3 - Basic Guide',
-        'Vue 4 - The Mystery'
-      ]
-    }
-  })
-}
-```
-
-Non-code blocks are ignored.
-
-```vue
-<!-- step 4 -->
-<script setup>
-const author = {
-  name: 'John Doe',
-  books: [
-    'Vue 2 - Advanced Guide',
-    'Vue 3 - Basic Guide',
-    'Vue 4 - The Mystery'
-  ]
-}
-</script>
-```
-````
-
----
-
-# Components
-
-<div grid="~ cols-2 gap-4">
-<div>
-
-You can use Vue components directly inside your slides.
-
-We have provided a few built-in components like `<Tweet/>`, `<BlueSky/>`, and `<Youtube/>` that you can use directly. And adding your custom components is also super easy.
-
-```html
-<Counter :count="10" />
-```
-
-<!-- ./components/Counter.vue -->
-<Counter :count="10" m="t-4" />
-
-Check out [the guides](https://sli.dev/builtin/components.html) for more.
-
-</div>
-<div>
-
-```html
-<Tweet id="1390115482657726468" />
-```
-
-<Tweet id="1390115482657726468" scale="0.65" />
-
-</div>
-</div>
 
 <!--
-Presenter note with **bold**, *italic*, and ~~striked~~ text.
-
-Also, HTML elements are valid:
-<div class="flex w-full">
-  <span style="flex-grow: 1;">Left content</span>
-  <span>Right content</span>
-</div>
+Step 2 では Service を絶対に触りません。
+find だけ Prisma 化すると戻り値の型が変わって Service が壊れるので、
+各 PR が常に「ビルドが通る中間状態」であることを守っています。
 -->
 
 ---
-class: px-20
+layout: define
+kicker: Step 1 — 最大の工夫
+term: ハイブリッドテスト
+definition: 1 つのテストファイルに <span class="accent2">Prisma と TypeORM が同居</span>している状態。
+points:
+  - データの insert / delete は最初から Prisma で書く
+  - 呼び出す Repository だけ TypeORM のまま
+  - 目的は Step 2 の diff を最小化すること
 ---
 
-# Themes
+<!--
+一見ちぐはぐですが、これが次のステップで効いてきます。
+-->
 
-Slidev comes with powerful theming support. Themes can provide styles, layouts, components, or even configurations for tools. Switching between themes by just **one edit** in your frontmatter:
-
-<div grid="~ cols-2 gap-2" m="t-2">
-
-```yaml
 ---
-theme: default
+layout: code-explain
+kicker: Step 2 の diff
+title: 変わるのは、この <span class="accent2">2 箇所だけ</span>
+notes:
+  - "<strong>import 文</strong> — TypeORM Repository → Prisma Repository"
+  - "<strong>インスタンス生成</strong> — dataSource → PrismaService"
+  - "<strong>insert / truncate / factory / アサーションは 1 行も変わらない</strong>"
 ---
+
+```diff
+-import { setup, setupPrismaHelper } from "../../../db.helper";
+-import { XxxRepository } from "../../../../repositories/typeorm/xxx.repository";
++import { PrismaService } from "../../../../prisma/prisma.service";
++import { setupPrismaHelper } from "../../../db.helper";
++import { XxxRepository } from "../../../../repositories/xxx.repository";
+
+ describe("findOneById", () => {
+-  const { dataSource } = setup();
+-  const { insert, truncate } = setupPrismaHelper();
+-  const repository = new XxxRepository(dataSource);
++  const { prisma, insert, truncate } = setupPrismaHelper();
++  const repository = new XxxRepository(prisma as unknown as PrismaService);
 ```
 
-```yaml
 ---
-theme: seriph
----
-```
-
-<img border="rounded" src="https://github.com/slidevjs/themes/blob/main/screenshots/theme-default/01.png?raw=true" alt="">
-
-<img border="rounded" src="https://github.com/slidevjs/themes/blob/main/screenshots/theme-seriph/01.png?raw=true" alt="">
-
-</div>
-
-Read more about [How to use a theme](https://sli.dev/guide/theme-addon#use-theme) and
-check out the [Awesome Themes Gallery](https://sli.dev/resources/theme-gallery).
-
+layout: statement
+kicker: これが意味するところ
+title: アサーションが変わっていないなら、<em>テスト観点も変わっていない</em>。
 ---
 
-# Clicks Animations
-
-You can add `v-click` to elements to add a click animation.
-
-<div v-click>
-
-This shows up when you press <kbd>space</kbd> or <kbd>right</kbd>, or click outside the slide on the right.
-
-```html
-<div v-click>This shows up when you trigger a click animation.</div>
-```
-
-</div>
-
-<p v-click>
-You can also add modifiers to change the animation:
-</p>
-
-<div class="grid gap-3 mt-4 text-sm" style="grid-template-columns: repeat(3, 1fr) 1.5fr 1fr">
-  <div v-after.up class="p-3 rounded border border-primary/20 bg-primary/10">
-    <div class="font-mono text-xs opacity-60 mb-1">v-click.up</div>
-    <div>Slide from bottom</div>
-  </div>
-  <div v-click.fade-in class="p-3 rounded border border-primary/30 bg-primary/15">
-    <div class="font-mono text-xs opacity-60 mb-1">v-click.fade-in</div>
-    <div>Fade in</div>
-  </div>
-  <div v-click.fade class="p-3 rounded border border-primary/40 bg-primary/20">
-    <div class="font-mono text-xs opacity-60 mb-1">v-click.fade</div>
-    <div>Dim (0.5 opacity)</div>
-  </div>
-  <div v-click.fade.right.scale class="p-3 rounded border border-primary/50 bg-primary/25">
-    <div class="font-mono text-xs opacity-60 mb-1">v-click.fade.right.scale</div>
-    <div>Composed</div>
-  </div>
-  <div v-click.none class="p-3 rounded border border-primary/60 bg-primary/30">
-    <div class="font-mono text-xs opacity-60 mb-1">v-click.none</div>
-    <div>No transition</div>
-  </div>
-</div>
-
-<v-click>
-
-The <span v-mark.red="7"><code>v-mark</code> directive</span>
-also allows you to add
-<span v-mark.circle.orange="8">inline marks</span>
-, powered by [Rough Notation](https://roughnotation.com/):
-
-```html
-<span v-mark.underline.orange>inline markers</span>
-```
-
-</v-click>
-
-<div v-click mt-12>
-
-[Learn more](https://sli.dev/guide/animations#click-animation)
-
-</div>
+<!--
+アサーションが変わっていないなら検証内容は変わっていない。
+レビュアーは「Prisma 実装が TypeORM と同じ振る舞いか」だけに集中できます。
+逆に diff でアサーションが書き換わっていたら、前提が崩れているサインです。
+-->
 
 ---
-
-# Motions
-
-Motion animations are powered by [@vueuse/motion](https://motion.vueuse.org/), triggered by `v-motion` directive.
-
-```html
-<div
-  v-motion
-  :initial="{ x: -80 }"
-  :enter="{ x: 0 }"
-  :click-3="{ x: 80 }"
-  :leave="{ x: 1000 }"
->
-  Slidev
-</div>
-```
-
-<div class="w-60 relative">
-  <div class="relative w-40 h-40">
-    <img
-      v-motion
-      :initial="{ x: 800, y: -100, scale: 1.5, rotate: -50 }"
-      :enter="final"
-      class="absolute inset-0"
-      src="https://sli.dev/logo-square.png"
-      alt=""
-    />
-    <img
-      v-motion
-      :initial="{ y: 500, x: -100, scale: 2 }"
-      :enter="final"
-      class="absolute inset-0"
-      src="https://sli.dev/logo-circle.png"
-      alt=""
-    />
-    <img
-      v-motion
-      :initial="{ x: 600, y: 400, scale: 2, rotate: 100 }"
-      :enter="final"
-      class="absolute inset-0"
-      src="https://sli.dev/logo-triangle.png"
-      alt=""
-    />
-  </div>
-
-  <div
-    class="text-5xl absolute top-14 left-40 text-[#2B90B6] -z-1"
-    v-motion
-    :initial="{ x: -80, opacity: 0}"
-    :enter="{ x: 0, opacity: 1, transition: { delay: 2000, duration: 1000 } }">
-    Slidev
-  </div>
-</div>
-
-<!-- vue script setup scripts can be directly used in markdown, and will only affects current page -->
-<script setup lang="ts">
-const final = {
-  x: 0,
-  y: 0,
-  rotate: 0,
-  scale: 1,
-  transition: {
-    type: 'spring',
-    damping: 10,
-    stiffness: 20,
-    mass: 2
-  }
-}
-</script>
-
-<div
-  v-motion
-  :initial="{ x:35, y: 30, opacity: 0}"
-  :enter="{ y: 0, opacity: 1, transition: { delay: 3500 } }">
-
-[Learn more](https://sli.dev/guide/animations.html#motion)
-
-</div>
-
+layout: statement
+kicker: Part 3 — AI に任せる
+title: LLM は放っておくと「まず全メソッドのテストを書いて、あとで PR に分けよう」をやる。
 ---
 
-# $\LaTeX$
-
-$\LaTeX$ is supported out-of-box. Powered by [$\KaTeX$](https://katex.org/).
-
-<div h-3 />
-
-Inline $\sqrt{3x-1}+(1+x)^2$
-
-Block
-$$ {1|3|all}
-\begin{aligned}
-\nabla \cdot \vec{E} &= \frac{\rho}{\varepsilon_0} \\
-\nabla \cdot \vec{B} &= 0 \\
-\nabla \times \vec{E} &= -\frac{\partial\vec{B}}{\partial t} \\
-\nabla \times \vec{B} &= \mu_0\vec{J} + \mu_0\varepsilon_0\frac{\partial\vec{E}}{\partial t}
-\end{aligned}
-$$
-
-[Learn more](https://sli.dev/features/latex)
+<!--
+そして分けられなくなります。
+なので手順を Agent Skills として書き下すときに工夫が必要でした。
+-->
 
 ---
+layout: default
+kicker: 工夫 1
+title: workflow スキルの「<span class="accent2">絶対に守るルール</span>」
+---
 
-# Diagrams
+- 1 メソッド = 1 ブランチ = 1 PR。複数メソッドを 1 PR にまとめない
+- **次のメソッドのファイルを触る前に、必ず前のメソッドの PR を作り切る**
+- 各ブランチは毎回 `origin/{親ブランチ}` から切り直す
+- Step 1 の全 PR がマージされるまで Step 2 に入らない
 
-You can create diagrams / graphs from textual descriptions, directly in your Markdown.
+<Callout icon="lucide:layers-2">
+スキルは 4 つに階層化。上位の workflow は**やり方を一切定義せず**、対象列挙・分割単位固定・順序制御・進捗管理だけを担う。
+</Callout>
 
-<div class="grid grid-cols-4 gap-5 pt-4 -mb-6">
+<!--
+「何をするか」と「どの順序で・どの粒度でするか」を別ファイルに分けたのが効きました。
+1 ファイルに全部書くと膨れ上がって、エージェントが細部を読み飛ばします。
+-->
 
-```mermaid {scale: 0.5, alt: 'A simple sequence diagram'}
-sequenceDiagram
-    Alice->John: Hello John, how are you?
-    Note over Alice,John: A typical interaction
-```
-
-```mermaid {theme: 'neutral', scale: 0.8}
-graph TD
-B[Text] --> C{Decision}
-C -->|One| D[Result 1]
-C -->|Two| E[Result 2]
-```
+---
+layout: diagram
+kicker: 工夫 2
+title: 親ブランチ + 統合ブランチで<span class="accent2">止めない</span>
+highlight: [P, S2]
+note: 各メソッドの PR は <strong>親ブランチ宛</strong>。develop のレビュー待ちに依存しない。
+---
 
 ```mermaid
-mindmap
-  root((mindmap))
-    Origins
-      Long history
-      ::icon(fa fa-book)
-      Popularisation
-        British popular psychology author Tony Buzan
-    Research
-      On effectiveness<br/>and features
-      On Automatic creation
-        Uses
-            Creative techniques
-            Strategic planning
-            Argument mapping
-    Tools
-      Pen and paper
-      Mermaid
+flowchart TD
+  D["develop"] --> P["feature/prisma-migration-{api}<br/>親ブランチ"]
+  P --> T1["task/…-test-find-one-by-id<br/>Step 1"]
+  P --> T2["task/…-repo-find-one-by-id<br/>Step 2"]
+  P --> S2["feature/prisma-migration-{api}-step2<br/>Step 2 統合ブランチ"]
+  S2 --> T3["task/…-service<br/>Step 3"]
 ```
 
-```plantuml {scale: 0.7}
-@startuml
-
-package "Some Group" {
-  HTTP - [First Component]
-  [Another Component]
-}
-
-node "Other Groups" {
-  FTP - [Second Component]
-  [First Component] --> FTP
-}
-
-cloud {
-  [Example 1]
-}
-
-database "MySql" {
-  folder "This is my folder" {
-    [Folder 3]
-  }
-  frame "Foo" {
-    [Frame 4]
-  }
-}
-
-[Another Component] --> [Example 1]
-[Example 1] --> [Folder 3]
-[Folder 3] --> [Frame 4]
-
-@enduml
-```
-
-</div>
-
-Learn more: [Mermaid Diagrams](https://sli.dev/features/mermaid) and [PlantUML Diagrams](https://sli.dev/features/plantuml)
+<!--
+Step 3 は「全メソッドが Prisma 化済み」が前提ですが、Step 2 の全 PR のマージを待ちません。
+Step 2 の全ブランチを merge した統合ブランチを自分で作って、その上で進めます。
+実運用で一番効いた部分です。
+-->
 
 ---
-foo: bar
-dragPos:
-  square: 691,32,167,_,-16
+layout: statement
+kicker: 結果
+title: 移行作業ではなく「移行を進めてよいかの判断」だけが、人間の仕事になった。
 ---
 
-# Draggable Elements
-
-Double-click on the draggable elements to edit their positions.
-
-<br>
-
-###### Directive Usage
-
-```md
-<img v-drag="'square'" src="https://sli.dev/logo.png">
-```
-
-<br>
-
-###### Component Usage
-
-```md
-<v-drag text-3xl>
-  <div class="i-carbon:arrow-up" />
-  Use the `v-drag` component to have a draggable container!
-</v-drag>
-```
-
-<v-drag pos="663,206,261,_,-15">
-  <div text-center text-3xl border border-main rounded>
-    Double-click me!
-  </div>
-</v-drag>
-
-<img v-drag="'square'" src="https://sli.dev/logo.png">
-
-###### Draggable Arrow
-
-```md
-<v-drag-arrow two-way />
-```
-
-<v-drag-arrow pos="67,452,253,46" two-way op70 />
+<!--
+人間に残るのは 2 つだけです。
+1 つは検索系テストのレビュー。WHERE 句が 1 つ抜けても正常系は通るので、網羅性は人が見ます。
+もう 1 つは「そもそもこれ、おかしくないか」の判断。
+論理削除の挙動差は ESLint ルールで対応、外部キー制約は別タスクに切り出しました。
+-->
 
 ---
-src: ./pages/imported-slides.md
-hide: false
+layout: bigtype
+kicker: 最大の学び
+title: <em>レビュー可能な粒度</em>まで、分解する。
+subtitle: そこまで分解できれば、AI は仕組みとして壊せない。そして人間にもレビューしやすい。
 ---
 
----
+<!--
+これを可能にしたのは AI の使い方の工夫ではなく、
+移行手順をレビュー可能な粒度まで分解して、
+システムとして「AI が壊せない形」に設計したことでした。
 
-# Monaco Editor
-
-Slidev provides built-in Monaco Editor support.
-
-Add `{monaco}` to the code block to turn it into an editor:
-
-```ts {monaco}
-import { ref } from 'vue'
-import { emptyArray } from './external'
-
-const arr = ref(emptyArray(10))
-```
-
-Use `{monaco-run}` to create an editor that can execute the code directly in the slide:
-
-```ts {monaco-run}
-import { version } from 'vue'
-import { emptyArray, sayHello } from './external'
-
-sayHello()
-console.log(`vue ${version}`)
-console.log(emptyArray<number>(10).reduce(fib => [...fib, fib.at(-1)! + fib.at(-2)!], [1, 1]))
-```
+逆に言うと、これは人間が移行する場合にもそのまま有効な設計です。
+「AI に任せられる手順」は「人間にとってもレビューしやすい手順」だった、
+というのが一番の学びでした。
+-->
 
 ---
-layout: center
-class: text-center
+layout: end
+title: ありがとうございました
+subtitle: 巨大なリファクタリングや ORM 移行に悩む方の参考になれば幸いです
+contact: https://zenn.dev/asuene/articles/d0e395d49be271
 ---
 
-# Learn More
-
-[Documentation](https://sli.dev) · [GitHub](https://github.com/slidevjs/slidev) · [Showcases](https://sli.dev/resources/showcases)
-
-<PoweredBySlidev mt-10 />
+<!--
+アスエネでは、こうしたリファクタリングに限らず、
+プロダクト開発やレビュープロセスでも AI をどんどん実戦投入して活用しています。
+気になる方はぜひお気軽にお声がけください。
+-->
