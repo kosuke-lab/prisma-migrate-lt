@@ -98,10 +98,13 @@ rows:
 <!--
 一気に書き換えられないので、3 つのステップに分けました。
 
-テストだけ書く、Repository を差し替える、Service を切り替える。
+Step1：既存のTypeORMのテストだけ書く、
+Step2：PrismaでRepositoryのコードを書き、テストのimportをTypeORMからPrismaにを差し替える、
+Step3：ServiceのimportをTypeORMからPrismaでRepositoryに切り替える。
 
-基準は「各 PR が常にビルドが通る中間状態であること」。
-だから Step 2 では Service を絶対に触りません。
+基準は「どの PR をマージしてもビルドが通る」こと。
+だから Step 2 では Service を触りません。
+一部のメソッドだけ Prisma 化した状態で Service を向けると、型が合わず壊れるからです。
 -->
 
 ---
