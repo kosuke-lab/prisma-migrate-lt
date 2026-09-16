@@ -56,17 +56,17 @@ kicker: Part 1
 title: なぜ「一気に書き換え」が<span class="accent2">できない</span>のか
 panels:
   - icon: "lucide:git-branch"
-    title: develop は止まらない
+    title: developが動き続けている
     items:
       - 移行中もマージされ続ける
       - → API 単位でリリース
   - icon: "lucide:file-diff"
-    title: 大きい PR は読まれない
+    title: 大きすぎるPRはレビューコストが高く、マージできない
     items:
       - 1 クラス分で +800 / −600 行
       - → 1 メソッド = 1 PR
   - icon: "lucide:shield-alert"
-    title: 壊れても気づけない
+    title: 挙動を変えていないことを保証しなければならない
     items:
       - "`findOne` は null か throw か"
       - → ハイブリッドテスト
@@ -79,7 +79,7 @@ panels:
 大きなブランチを抱えたままだとコンフリクトを解消し続けることになります。
 
 2 つ目。+800/−600 行の PR は、メソッドの対応関係をレビュアーが自力で復元することになる。
-結果、形式的な Approve か後回しです。
+レビューコストが高すぎて、そのままではマージまで辿り着きません。
 
 3 つ目。ORM を変えると「動いてはいるが挙動が違う」が起きます。
 -->
