@@ -92,7 +92,7 @@ columns: [ステップ, やること, PR 粒度]
 rows:
   - { metric: Step 1, before: "TypeORM Repository のテストをハイブリッド Test 構成で作成", after: "1 メソッド = 1 PR" }
   - { metric: Step 2, before: "Prisma 版 Repository を作成し、テストの import 先を差し替え", after: "1 メソッド = 1 PR" }
-  - { metric: Step 3, before: "Service の呼び出しを Prisma 版に切り替え", after: "1 Repository = 1 PR" }
+  - { metric: Step 3, before: "Service の呼び出しを Prisma 版に切り替え", after: "1 Service = 1 PR" }
 ---
 
 <!--
@@ -181,12 +181,12 @@ definition: Service が受け取る Repository を <span class="accent2">Prisma 
 points:
   - Prisma 版 Repository は Step 2 で完成済み
   - Service のロジック自体は書き換えない
-  - ここだけ 1 Repository = 1 PR
+  - ここだけ 1 Service = 1 PR
 ---
 
 <!--
 Step 3 です。Repository は Step 2 で完成しているので、
-Service は受け取るものを差し替えるだけ。ここだけ 1 Repository = 1 PR です。
+Service は受け取るものを差し替えるだけ。ここだけ 1 Service = 1 PR です。
 
 この 3 ステップを通しで回すワークフローが、次の話に繋がります。
 -->
